@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hex-core-service
+spec:
+  selector:
+    app: hex-core-service
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080

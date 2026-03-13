@@ -1,0 +1,13 @@
+[book]
+title = "CE-RISE DP System Template Documentation"
+authors = ["CE-RISE consortium"]
+language = "en"
+src = "."
+
+[build]
+build-dir = "book"
+
+[output.html]
+git-repository-url = "https://codeberg.org/CE-RISE-software/dp-system-gitops-template"
+sidebar-header-nav = true
+additional-js = ["theme/custom.js"]

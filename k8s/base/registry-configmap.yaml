@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: registry-catalog
+data:
+    catalog.json: |
+        {
+          "models": [
+            {
+              "model": "dp-record-metadata",
+              "version": "0.0.2",
+              "base_url": "https://codeberg.org/CE-RISE-models/dp-record-metadata/src/tag/pages-v0.0.2/generated/"
+            },
+            {
+              "model": "product-profile",
+              "version": "0.0.3",
+              "base_url": "https://codeberg.org/CE-RISE-models/product-profile/src/tag/pages-v0.0.3/generated/"
+            },
+            {
+              "model": "usage-and-maintenance",
+              "version": "0.0.2",
+              "base_url": "https://codeberg.org/CE-RISE-models/usage-and-maintenance/src/tag/pages-v0.0.2/generated/"
+            },
+            {
+              "model": "re-indicators-specification",
+              "version": "0.0.3",
+              "base_url": "https://codeberg.org/CE-RISE-models/re-indicators-specification/src/tag/pages-v0.0.3/generated/"
+            }
+          ]
+        }
