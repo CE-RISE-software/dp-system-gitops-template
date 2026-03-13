@@ -1,0 +1,10 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hex-core-service
+spec:
+  template:
+    spec:
+      containers:
+        - name: hex-core-service
+          imagePullPolicy: IfNotPresent

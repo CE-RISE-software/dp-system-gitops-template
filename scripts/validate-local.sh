@@ -13,8 +13,12 @@ echo "Validating Docker Compose rendering"
 )
 
 if command -v kubectl >/dev/null 2>&1; then
-  echo "Validating Kustomize rendering"
+  echo "Validating Kustomize base rendering"
   kubectl kustomize "$repo_root/k8s/base" >/dev/null
+  echo "Validating Kustomize dev overlay rendering"
+  kubectl kustomize "$repo_root/k8s/overlays/dev" >/dev/null
+  echo "Validating Kustomize prod overlay rendering"
+  kubectl kustomize "$repo_root/k8s/overlays/prod" >/dev/null
 else
   echo "Skipping Kustomize rendering: kubectl not installed"
 fi

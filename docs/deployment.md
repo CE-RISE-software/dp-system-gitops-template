@@ -26,11 +26,35 @@ Baseline structure:
 - [`k8s/base/hex-core-deployment.yaml`](/home/riccardo/code/CE-RISE-software/dp-system-gitops-template/k8s/base/hex-core-deployment.yaml)
 - [`k8s/base/registry-configmap.yaml`](/home/riccardo/code/CE-RISE-software/dp-system-gitops-template/k8s/base/registry-configmap.yaml)
 - [`k8s/base/auth-secret.example.yaml`](/home/riccardo/code/CE-RISE-software/dp-system-gitops-template/k8s/base/auth-secret.example.yaml)
+- [`k8s/overlays/dev/kustomization.yaml`](/home/riccardo/code/CE-RISE-software/dp-system-gitops-template/k8s/overlays/dev/kustomization.yaml)
+- [`k8s/overlays/prod/kustomization.yaml`](/home/riccardo/code/CE-RISE-software/dp-system-gitops-template/k8s/overlays/prod/kustomization.yaml)
 
 ## Adapter deployment modes
 
 - External adapter: default and documented baseline.
 - Internal adapter slot: supported as an optional extension point, not as the default template path.
+
+## Development overlay
+
+The repository now includes a minimal development overlay:
+
+- dedicated namespace
+- debug logging
+- example cluster-local adapter URL override
+- insecure auth mode for development only
+
+This overlay is not the production security model. It exists to make local and early-cluster testing easier.
+
+## Production overlay
+
+The repository also includes a minimal production-oriented overlay:
+
+- dedicated production namespace
+- `jwt_jwks` authentication path
+- example auth secret manifest
+- replica count and resource requests/limits
+
+This overlay is still a template starting point. Operators are expected to replace example secret material and environment-specific endpoints.
 
 ## Network assumptions
 

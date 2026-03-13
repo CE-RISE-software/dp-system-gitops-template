@@ -44,6 +44,11 @@ Common variables:
 Alternative modes such as `forward_auth` are supported by the core but are deployment variants rather than the baseline.
 `AUTH_MODE=none` is a dev-only escape hatch and should not be treated as a normal deployment mode.
 
+Overlay intent:
+
+- `k8s/overlays/dev` may use `AUTH_MODE=none` for local cluster bring-up
+- `k8s/overlays/prod` uses the `jwt_jwks` path
+
 ## Registry
 
 Registry configuration is a first-class deployment concern.

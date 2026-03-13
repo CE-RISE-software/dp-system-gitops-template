@@ -24,6 +24,8 @@ Typical checks include:
 Typical checks include:
 
 - `kubectl kustomize`
+- `kubectl kustomize k8s/overlays/dev`
+- `kubectl kustomize k8s/overlays/prod`
 - `kubectl get pods`
 - `kubectl logs`
 - service and secret presence checks

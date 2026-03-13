@@ -17,7 +17,7 @@ It does not bundle a default adapter implementation or a demo stack.
 
 Documentation:
 
-- [Template documentation](docs/index.md)
+- [Template documentation](https://ce-rise-software.codeberg.page/dp-system-gitops-template/)
 
 ## License
 
