@@ -1,32 +1,32 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hex-core-service
+    name: hex-core-service
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: hex-core-service
-  template:
-    metadata:
-      labels:
-        app: hex-core-service
-    spec:
-      containers:
-        - name: hex-core-service
-          image: ghcr.io/ce-rise/hex-core-service:0.0.5
-          ports:
-            - containerPort: 8080
-          envFrom:
-            - configMapRef:
-                name: hex-core-env
-            - secretRef:
-                name: hex-core-auth
-          volumeMounts:
-            - name: registry-catalog
-              mountPath: /config/registry
-              readOnly: true
-      volumes:
-        - name: registry-catalog
-          configMap:
-            name: registry-catalog
+    replicas: 1
+    selector:
+        matchLabels:
+            app: hex-core-service
+    template:
+        metadata:
+            labels:
+                app: hex-core-service
+        spec:
+            containers:
+                - name: hex-core-service
+                  image: rg.fr-par.scw.cloud/ce-rise-software/hex-core-service:latest
+                  ports:
+                      - containerPort: 8080
+                  envFrom:
+                      - configMapRef:
+                            name: hex-core-env
+                      - secretRef:
+                            name: hex-core-auth
+                  volumeMounts:
+                      - name: registry-catalog
+                        mountPath: /config/registry
+                        readOnly: true
+            volumes:
+                - name: registry-catalog
+                  configMap:
+                      name: registry-catalog

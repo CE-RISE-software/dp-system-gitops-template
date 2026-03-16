@@ -1,6 +1,11 @@
 SHELL := /bin/bash
 
-.PHONY: validate
+.PHONY: validate validate-compose validate-kubernetes
 
-validate:
-	./scripts/validate-local.sh
+validate: validate-compose
+
+validate-compose:
+	./scripts/validate-local-compose.sh
+
+validate-kubernetes:
+	./scripts/validate-local-kubernetes.sh

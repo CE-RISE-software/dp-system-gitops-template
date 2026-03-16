@@ -3,22 +3,26 @@
         {
             "model": "dp-record-metadata",
             "version": "0.0.2",
-            "base_url": "https://codeberg.org/CE-RISE-models/dp-record-metadata/src/tag/pages-v0.0.2/generated/"
+            "schema_url": "https://codeberg.org/CE-RISE-models/dp-record-metadata/raw/tag/pages-v0.0.2/generated/schema.json",
+            "shacl_url": "https://codeberg.org/CE-RISE-models/dp-record-metadata/raw/tag/pages-v0.0.2/generated/shacl.ttl"
         },
         {
             "model": "product-profile",
             "version": "0.0.3",
-            "base_url": "https://codeberg.org/CE-RISE-models/product-profile/src/tag/pages-v0.0.3/generated/"
+            "schema_url": "https://codeberg.org/CE-RISE-models/product-profile/raw/tag/pages-v0.0.3/generated/schema.json",
+            "shacl_url": "https://codeberg.org/CE-RISE-models/product-profile/raw/tag/pages-v0.0.3/generated/shacl.ttl"
         },
         {
             "model": "usage-and-maintenance",
             "version": "0.0.2",
-            "base_url": "https://codeberg.org/CE-RISE-models/usage-and-maintenance/src/tag/pages-v0.0.2/generated/"
+            "schema_url": "https://codeberg.org/CE-RISE-models/usage-and-maintenance/raw/tag/pages-v0.0.2/generated/schema.json",
+            "shacl_url": "https://codeberg.org/CE-RISE-models/usage-and-maintenance/raw/tag/pages-v0.0.2/generated/shacl.ttl"
         },
         {
             "model": "re-indicators-specification",
             "version": "0.0.3",
-            "base_url": "https://codeberg.org/CE-RISE-models/re-indicators-specification/src/tag/pages-v0.0.3/generated/"
+            "schema_url": "https://codeberg.org/CE-RISE-models/re-indicators-specification/raw/tag/pages-v0.0.3/generated/schema.json",
+            "shacl_url": "https://codeberg.org/CE-RISE-models/re-indicators-specification/raw/tag/pages-v0.0.3/generated/shacl.ttl"
         }
     ]
 }

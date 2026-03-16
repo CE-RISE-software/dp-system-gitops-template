@@ -4,16 +4,20 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
     environment:
       REGISTRY_CATALOG_FILE: /config/registry/catalog.json
     ports:
       - "${HEX_CORE_PORT}:8080"
     volumes:
-      - ./registry/catalog.json:/config/registry/catalog.json:ro
+      - ./registry/catalog.json:/config/registry/catalog.json:ro,Z
 
   # Optional extension point for adopters who want to run an adapter in the same stack.
   # The baseline template expects IO_ADAPTER_BASE_URL to point to an external adapter.
   io-adapter:
-    profiles: ["internal-adapter"]
-    image: ${IO_ADAPTER_IMAGE:-ghcr.io/ce-rise/example-io-adapter:0.0.0}
+    profiles:
+      - internal-adapter
+    image: ${IO_ADAPTER_IMAGE:-rg.fr-par.scw.cloud/ce-rise-software/dp-storage-jsondb:latest}
     restart: unless-stopped
