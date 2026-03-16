@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-title: Project template for software developed within the CE-RISE Horizon Europe project
+title: CE-RISE Digital Passport System GitOps Template
 message: >-
   v0.0.1 - Initial sketch of project template.
 type: software
@@ -14,10 +14,10 @@ identifiers:
   - type: doi
     value: xxx_to_be_obtained_xxx
     description: This DOI represents all software versions.
-repository-code: 'https://codeberg.org/CE-RISE-software/template-software'
-url: 'https://ce-rise-software.codeberg.page/template-software/'
+repository-code: 'https://codeberg.org/CE-RISE-software/dp-system-gitops-template'
+url: 'https://ce-rise-software.codeberg.page/dp-system-gitops-template/'
 abstract: >-
-  Project template for data models developed within the CE-RISE Horizon Europe project.
+  This project provides a deployment template for a CE-RISE Digital Passport system instance.
 keywords:
   - CE-RISE
   - Open Source

@@ -5,7 +5,7 @@ This directory contains the baseline Docker Compose deployment template.
 Default mode:
 
 - deploy `hex-core-service`
-- mount a pinned local registry catalog
+- mount a pinned local registry catalog with explicit artifact URLs
 - point the core service to an external HTTP `io-adapter`
 
 Optional extension:

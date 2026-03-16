@@ -15,6 +15,7 @@ This template should support a minimal operator verification checklist.
 
 Typical checks include:
 
+- `./scripts/validate-local-compose.sh`
 - `docker compose config`
 - `docker compose ps`
 - `docker compose logs`
@@ -23,9 +24,8 @@ Typical checks include:
 
 Typical checks include:
 
+- `./scripts/validate-local-kubernetes.sh`
 - `kubectl kustomize`
-- `kubectl kustomize k8s/overlays/dev`
-- `kubectl kustomize k8s/overlays/prod`
 - `kubectl get pods`
 - `kubectl logs`
 - service and secret presence checks
@@ -36,6 +36,6 @@ Common deployment failures are likely to come from:
 
 - invalid auth configuration
 - unreachable or misconfigured `io-adapter`
-- registry catalog mismatch
+- registry catalog mismatch or invalid artifact URLs
 - blocked network egress
 - image tag drift

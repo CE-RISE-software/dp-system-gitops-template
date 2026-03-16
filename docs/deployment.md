@@ -7,6 +7,7 @@ This template distinguishes between two maturity levels.
 - Docker Compose is the mandatory working baseline.
 - The default deployment points `hex-core-service` at an external HTTP `io-adapter`.
 - The default registry source is a local pinned catalog file mounted into the container.
+- The catalog uses explicit per-artifact URLs for each model entry.
 
 Baseline structure:
 

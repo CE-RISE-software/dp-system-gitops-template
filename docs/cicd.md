@@ -6,18 +6,23 @@ Validation of deployment scaffolding is currently treated as a local operator ta
 ## Local validation
 
 - validate Compose rendering
+- run a local Compose smoke test against the published image
 - validate Kustomize rendering
+- run a local Kubernetes smoke test against the dev overlay
 - run shell checks if scripts are added
 
 Repository entry points:
 
 - [`Makefile`](/home/riccardo/code/CE-RISE-software/dp-system-gitops-template/Makefile)
-- [`scripts/validate-local.sh`](/home/riccardo/code/CE-RISE-software/dp-system-gitops-template/scripts/validate-local.sh)
+- [`scripts/validate-local-compose.sh`](/home/riccardo/code/CE-RISE-software/dp-system-gitops-template/scripts/validate-local-compose.sh)
+- [`scripts/validate-local-kubernetes.sh`](/home/riccardo/code/CE-RISE-software/dp-system-gitops-template/scripts/validate-local-kubernetes.sh)
 
-The local validation script assumes:
+The local validation scripts assume:
 
 - Docker or a compatible Compose provider is installed
-- `kubectl` is installed if Kustomize rendering should be checked locally
+- `kubectl` is installed
+- a local Kubernetes cluster is available for the Kubernetes smoke test
+- Podman/Docker networking allows outbound DNS and HTTPS from the runtime containers
 
 ## Release discipline
 

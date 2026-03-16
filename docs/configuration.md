@@ -61,6 +61,7 @@ Recommended baseline:
 - `REGISTRY_REQUIRE_HTTPS=true`
 
 The template ships a pinned local catalog file with CE-RISE model entries.
+Those entries use explicit artifact references such as `schema_url` and `shacl_url` rather than a single inferred `base_url`.
 
 ## Images
 
