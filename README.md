@@ -1,6 +1,6 @@
 # CE-RISE DP System GitOps Template
 
-[![DOI](https://zenodo.org/badge/DOI/TOBEOBTAINED.svg)](https://doi.org/TOBEOBTAINED)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19050358.svg)](https://doi.org/10.5281/zenodo.19050358)
 
 This repository provides a deployment template for a CE-RISE Digital Passport system instance.
 It is centered on `hex-core-service` as the stable application component and a pluggable HTTP `io-adapter` as the storage and integration boundary.
