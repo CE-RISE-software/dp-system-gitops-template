@@ -3,7 +3,7 @@ title: CE-RISE Digital Passport System GitOps Template
 message: >-
   v0.0.1 - Initial sketch of project template.
 type: software
-doi: xxx_to_be_obtained_xxx
+doi: 10.5281/zenodo.19050358
 authors:
   - given-names: Riccardo
     family-names: Boero
@@ -12,7 +12,7 @@ authors:
     affiliation: NILU
 identifiers:
   - type: doi
-    value: xxx_to_be_obtained_xxx
+    value: 10.5281/zenodo.19050358
     description: This DOI represents all software versions.
 repository-code: 'https://codeberg.org/CE-RISE-software/dp-system-gitops-template'
 url: 'https://ce-rise-software.codeberg.page/dp-system-gitops-template/'
