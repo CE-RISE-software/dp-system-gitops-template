@@ -1,7 +1,5 @@
 cff-version: 1.2.0
 title: CE-RISE Digital Passport System GitOps Template
-message: >-
-  v0.0.1 - Initial sketch of project template.
 type: software
 doi: 10.5281/zenodo.19050358
 authors:
