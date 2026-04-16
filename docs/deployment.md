@@ -35,6 +35,15 @@ Baseline structure:
 - External adapter: default and documented baseline.
 - Internal adapter slot: supported as an optional extension point, not as the default template path.
 
+## Optional downstream services
+
+The template may also host optional services that sit beside `hex-core-service` and use it as an application dependency.
+
+- `re-indicators-calculation-service` is supported as an isolated Compose extension profile.
+- `re-indicators-calculation-service` is also supported through isolated Kustomize overlays.
+- This service is not part of the `io-adapter` boundary and should not reshape the baseline core deployment path.
+- The optional Compose profile and Kubernetes overlays depend on `hex-core-service` and the published `re-indicators-specification` artifacts.
+
 ## Development overlay
 
 The repository now includes a minimal development overlay:

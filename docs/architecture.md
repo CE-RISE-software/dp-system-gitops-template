@@ -6,6 +6,7 @@ This repository is a deployment template for a DP system instance, not an applic
 
 - `hex-core-service` is the invariant application component.
 - The `io-adapter` is the replaceable HTTP integration boundary used for record storage and external system integration.
+- Optional downstream application services may depend on `hex-core-service` without becoming part of the `io-adapter` boundary.
 - Registry sources provide model artifacts consumed by `hex-core-service`.
 
 ## Default deployment pattern

@@ -16,6 +16,7 @@ This template should support a minimal operator verification checklist.
 Typical checks include:
 
 - `./scripts/validate-local-compose.sh`
+- `COMPOSE_PROFILES=re-indicators ./scripts/validate-local-compose.sh`
 - `docker compose config`
 - `docker compose ps`
 - `docker compose logs`
@@ -25,6 +26,8 @@ Typical checks include:
 Typical checks include:
 
 - `./scripts/validate-local-kubernetes.sh`
+- `K8S_OVERLAY=dev-re-indicators ./scripts/validate-local-kubernetes.sh`
+- `K8S_OVERLAY=prod-re-indicators ./scripts/validate-local-kubernetes.sh`
 - `kubectl kustomize`
 - `kubectl get pods`
 - `kubectl logs`
@@ -39,3 +42,5 @@ Common deployment failures are likely to come from:
 - registry catalog mismatch or invalid artifact URLs
 - blocked network egress
 - image tag drift
+
+Production-oriented overlays may also appear healthy while still rejecting unauthenticated smoke traffic by design.

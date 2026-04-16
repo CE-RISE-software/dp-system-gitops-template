@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - deployment.yaml
+  - service.yaml
+
+configMapGenerator:
+  - name: re-indicators-env
+    literals:
+      - HEX_CORE_BASE_URL=http://hex-core-service:8080
+      - ARTIFACT_BASE_URL_TEMPLATE=https://ce-rise-models.codeberg.page/re-indicators-specification/generated/
+      - HTTP_TIMEOUT_SECS=15
+
+generatorOptions:
+  disableNameSuffixHash: true

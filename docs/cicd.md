@@ -17,6 +17,16 @@ Repository entry points:
 - [`scripts/validate-local-compose.sh`](/home/riccardo/code/CE-RISE-software/dp-system-gitops-template/scripts/validate-local-compose.sh)
 - [`scripts/validate-local-kubernetes.sh`](/home/riccardo/code/CE-RISE-software/dp-system-gitops-template/scripts/validate-local-kubernetes.sh)
 
+Useful local targets:
+
+- `make validate`
+- `make validate-compose`
+- `make validate-compose-re-indicators`
+- `make validate-kubernetes`
+- `make validate-kubernetes-re-indicators`
+
+For production-oriented overlays, local validation currently proves deployment and health. End-to-end authenticated functional checks still require real auth infrastructure and credentials.
+
 The local validation scripts assume:
 
 - Docker or a compatible Compose provider is installed

@@ -14,6 +14,26 @@ services:
     volumes:
       - ./registry/catalog.json:/config/registry/catalog.json:ro,Z
 
+  re-indicators-calculation-service:
+    profiles:
+      - re-indicators
+    image: ${RE_INDICATORS_CALC_IMAGE}
+    restart: unless-stopped
+    depends_on:
+      hex-core-service:
+        condition: service_started
+    env_file:
+      - .env
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
+    environment:
+      HEX_CORE_BASE_URL: ${RE_INDICATORS_HEX_CORE_BASE_URL}
+      ARTIFACT_BASE_URL_TEMPLATE: ${RE_INDICATORS_ARTIFACT_BASE_URL_TEMPLATE}
+      HTTP_TIMEOUT_SECS: ${RE_INDICATORS_HTTP_TIMEOUT_SECS}
+    ports:
+      - "${RE_INDICATORS_CALC_PORT}:8081"
+
   # Optional extension point for adopters who want to run an adapter in the same stack.
   # The baseline template expects IO_ADAPTER_BASE_URL to point to an external adapter.
   io-adapter:

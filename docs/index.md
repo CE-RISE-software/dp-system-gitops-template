@@ -12,6 +12,7 @@ What this template assumes:
 - Registry configuration is a first-class deployment concern.
 - Outbound network access from `hex-core-service` to the configured registry source and `io-adapter` is required.
 - The template uses pinned image references and pinned model catalog entries in release-ready examples.
+- Optional downstream services may be layered on top through isolated Compose profiles or Kustomize overlays.
 
 Use the sections in this documentation according to your deployment task. They are designed as peer references rather than a single linear tutorial.
 

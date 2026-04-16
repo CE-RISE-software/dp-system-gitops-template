@@ -1,35 +1,30 @@
 {
-  "title": "CE-RISE Digital Passport System GitOps Template",
-  "description": "This project provides a deployment template for a CE-RISE Digital Passport system instance.",
-  "license": "EUPL-1.2",
-  "upload_type": "software",
-  "creators": [
-    {
-      "name": "Boero, Riccardo",
-      "affiliation": "NILU",
-      "orcid": "0000-0002-7468-9096"
-    }
-  ],
-  "keywords": [
-    "CE-RISE",
-    "Open Source",
-    "Open Science",
-    "Digital Product Passport",
-    "Digital Material Passport"
-  ],
-  "notes": "v0.0.1 - Initial sketch of project template.",
-  "communities": [
-    { "identifier": "ce-rise" },
-    { "identifier": "impact" }
-  ],
-  "grants": [
-    { "id": "101092281" }
-  ],
-  "related_identifiers": [
-    {
-      "identifier": "https://codeberg.org/CE-RISE-software/dp-system-gitops-template",
-      "relation": "isSupplementTo",
-      "resource_type": "software"
-    }
-  ]
+    "title": "CE-RISE Digital Passport System GitOps Template",
+    "description": "This project provides a deployment template for a CE-RISE Digital Passport system instance.",
+    "license": "EUPL-1.2",
+    "upload_type": "software",
+    "creators": [
+        {
+            "name": "Boero, Riccardo",
+            "affiliation": "NILU",
+            "orcid": "0000-0002-7468-9096"
+        }
+    ],
+    "keywords": [
+        "CE-RISE",
+        "Open Source",
+        "Open Science",
+        "Digital Product Passport",
+        "Digital Material Passport"
+    ],
+    "notes": "v0.0.2 - Added template extensions for optional RE indicators deployment.",
+    "communities": [{ "identifier": "ce-rise" }, { "identifier": "impact" }],
+    "grants": [{ "id": "101092281" }],
+    "related_identifiers": [
+        {
+            "identifier": "https://codeberg.org/CE-RISE-software/dp-system-gitops-template",
+            "relation": "isSupplementTo",
+            "resource_type": "software"
+        }
+    ]
 }

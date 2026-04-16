@@ -63,6 +63,18 @@ Recommended baseline:
 The template ships a pinned local catalog file with CE-RISE model entries.
 Those entries use explicit artifact references such as `schema_url` and `shacl_url` rather than a single inferred `base_url`.
 
+## Optional downstream services
+
+The baseline template does not require any downstream application service beside `hex-core-service`.
+
+If the optional `re-indicators` Compose profile is enabled, the following variables are also used:
+
+- `RE_INDICATORS_CALC_IMAGE`
+- `RE_INDICATORS_CALC_PORT`
+- `RE_INDICATORS_HEX_CORE_BASE_URL`
+- `RE_INDICATORS_ARTIFACT_BASE_URL_TEMPLATE`
+- `RE_INDICATORS_HTTP_TIMEOUT_SECS`
+
 ## Images
 
 - Use explicit image references with immutable version tags.

@@ -11,6 +11,7 @@ The template is opinionated:
 - Kubernetes with Kustomize is part of the production template target.
 - The default deployment mode points `hex-core-service` to an externally managed `io-adapter`.
 - The default registry configuration is a local pinned catalog file with explicit artifact URLs for CE-RISE models published on Codeberg over HTTPS.
+- Optional downstream services may be added beside `hex-core-service` through isolated profiles without changing the baseline core and `io-adapter` contract.
 
 This repository documents and scaffolds deployment structure, configuration, and operational expectations.
 It does not bundle a default adapter implementation or a demo stack.

@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: re-indicators-calculation-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: re-indicators-calculation-service
+  template:
+    metadata:
+      labels:
+        app: re-indicators-calculation-service
+    spec:
+      containers:
+        - name: re-indicators-calculation-service
+          image: rg.fr-par.scw.cloud/ce-rise-software/re-indicators-calculation:latest
+          ports:
+            - containerPort: 8081
+          envFrom:
+            - configMapRef:
+                name: re-indicators-env

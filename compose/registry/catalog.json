@@ -20,9 +20,9 @@
         },
         {
             "model": "re-indicators-specification",
-            "version": "0.0.3",
-            "schema_url": "https://codeberg.org/CE-RISE-models/re-indicators-specification/raw/tag/pages-v0.0.3/generated/schema.json",
-            "shacl_url": "https://codeberg.org/CE-RISE-models/re-indicators-specification/raw/tag/pages-v0.0.3/generated/shacl.ttl"
+            "version": "0.0.5",
+            "schema_url": "https://codeberg.org/CE-RISE-models/re-indicators-specification/raw/tag/pages-v0.0.5/generated/schema.json",
+            "shacl_url": "https://codeberg.org/CE-RISE-models/re-indicators-specification/raw/tag/pages-v0.0.5/generated/shacl.ttl"
         }
     ]
 }

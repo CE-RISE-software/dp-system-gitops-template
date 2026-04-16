@@ -11,5 +11,6 @@ Default mode:
 Optional extension:
 
 - enable the `internal-adapter` profile to add an adapter service slot to the stack
+- enable the `re-indicators` profile to add `re-indicators-calculation-service` beside `hex-core-service`
 
-The optional adapter slot is not the primary template path and should be treated as an adopter extension point.
+The optional services are not the primary template path and should be treated as adopter extension points.
