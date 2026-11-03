@@ -7,8 +7,9 @@ on:
             - "v*.*.*-*" # Matches pre-release tags like v1.0.0-beta
 
 env:
-    PROJECT_NAME: CE-RISE DP System GitOps Template # PLEASE UPDATE THE PROJECT TITLE HERE
-    PRIMARY_REPO_URL: https://codeberg.org/CE-RISE-software/dp-system-gitops-template # PLEASE UPDATE THE PROJECT MAIN URL HERE
+    PROJECT_NAME: CE-RISE DP System GitOps Template
+    PRIMARY_REPO_URL: https://codeberg.org/CE-RISE-software/dp-system-gitops-template
+    DOCUMENTATION_URL: https://ce-rise-software.codeberg.page/dp-system-gitops-template/
 
 jobs:
     create-release:
@@ -40,32 +41,14 @@ jobs:
             - name: Generate Release Notes
               id: notes
               if: steps.check_release.outputs.EXISTS == 'false'
+              env:
+                  RELEASE_TAG: ${{ steps.tag.outputs.TAG_NAME }}
               run: |
-                  cat << EOF > release_notes.md
-                  ## ${PROJECT_NAME} ${{ steps.tag.outputs.TAG_NAME }}
-
-                  This release is automatically mirrored from the primary repository on Codeberg: ${PRIMARY_REPO_URL}
-
-                  ### Overview
-
-                  This tag contains a versioned release of the CE-RISE software components.
-                  It is intended to keep GitHub releases aligned with Codeberg tags for downstream automation and archival.
-
-                  ### Release Assets
-
-                  If configured in CI/CD, this release may be accompanied by:
-                  - container images (version tag and commit SHA tags),
-                  - OpenAPI artifacts,
-                  - generated SDK packages.
-
-                  ### Documentation
-
-                  Project documentation and operational guidance are published from the primary repository.
-
-                  ---
-
-                  **Note**: This repository is a mirror. For issues, pull requests, and canonical release notes, use the main Codeberg repository (${PRIMARY_REPO_URL}).
-                  EOF
+                  {
+                      printf '## %s %s\n\n' "$PROJECT_NAME" "$RELEASE_TAG"
+                      python3 scripts/extract_release_notes.py "$RELEASE_TAG"
+                      printf '\n---\n\nCanonical source: %s\n\nDocumentation: %s\n' "$PRIMARY_REPO_URL" "$DOCUMENTATION_URL"
+                  } > release_notes.md
 
             - name: Create GitHub Release
               if: steps.check_release.outputs.EXISTS == 'false'

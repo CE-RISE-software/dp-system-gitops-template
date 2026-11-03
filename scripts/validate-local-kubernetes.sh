@@ -7,14 +7,16 @@ overlay_dir="$repo_root/k8s/overlays/$overlay_name"
 namespace="dp-system-dev"
 port_forward_pid=""
 calc_port_forward_pid=""
-sample_re_indicators_payload="/tmp/k8s-re-indicators-sample-payload.json"
+see_port_forward_pid=""
+resources_applied=false
+sample_re_indicators_payload=""
 skip_authenticated_checks=false
 
 case "$overlay_name" in
-  dev|dev-re-indicators)
+  dev|dev-re-indicators|dev-see-impacts|dev-calculations)
     namespace="dp-system-dev"
     ;;
-  prod|prod-re-indicators)
+  prod|prod-re-indicators|prod-see-impacts|prod-calculations)
     namespace="dp-system-prod"
     skip_authenticated_checks=true
     ;;
@@ -35,7 +37,7 @@ wait_for_http_code() {
 
   while true; do
     curl_stderr="$(mktemp)"
-    code="$(curl -sS -o /tmp/dp-validator-body.json -w '%{http_code}' "$url" 2>"$curl_stderr" || true)"
+    code="$(curl -sS --connect-timeout 5 --max-time 30 -o /tmp/dp-validator-body.json -w '%{http_code}' "$url" 2>"$curl_stderr" || true)"
     if [[ "$code" == "$expected" ]]; then
       rm -f "$curl_stderr"
       return 0
@@ -82,9 +84,13 @@ k8s_logs_on_failure() {
   kubectl get events -n "$namespace" --sort-by=.lastTimestamp >&2 || true
   echo "hex-core-service logs:" >&2
   kubectl logs -n "$namespace" deployment/hex-core-service >&2 || true
-  if [[ "$overlay_name" == *"re-indicators"* ]]; then
+  if [[ "$overlay_name" == *"re-indicators"* || "$overlay_name" == *"calculations"* ]]; then
     echo "re-indicators-calculation-service logs:" >&2
     kubectl logs -n "$namespace" deployment/re-indicators-calculation-service >&2 || true
+  fi
+  if [[ "$overlay_name" == *"see-impacts"* || "$overlay_name" == *"calculations"* ]]; then
+    echo "see-impacts-calculation-service logs:" >&2
+    kubectl logs -n "$namespace" deployment/see-impacts-calculation-service >&2 || true
   fi
 }
 
@@ -97,8 +103,14 @@ cleanup() {
     kill "$calc_port_forward_pid" >/dev/null 2>&1 || true
     wait "$calc_port_forward_pid" >/dev/null 2>&1 || true
   fi
-  kubectl delete -k "$overlay_dir" >/dev/null 2>&1 || true
-  wait_for_namespace_absent "$namespace" 120 || true
+  if [[ -n "$see_port_forward_pid" ]]; then
+    kill "$see_port_forward_pid" >/dev/null 2>&1 || true
+    wait "$see_port_forward_pid" >/dev/null 2>&1 || true
+  fi
+  if [[ "$resources_applied" == "true" ]]; then
+    kubectl delete -k "$overlay_dir" >/dev/null 2>&1 || true
+    wait_for_namespace_absent "$namespace" 120 || true
+  fi
   rm -f "$sample_re_indicators_payload"
 }
 
@@ -232,6 +244,7 @@ if ! command -v kubectl >/dev/null 2>&1; then
   exit 1
 fi
 
+sample_re_indicators_payload="$(mktemp /tmp/dp-k8s-re-indicators.XXXXXX)"
 trap cleanup EXIT
 
 echo "Validating Kustomize base rendering"
@@ -253,24 +266,33 @@ if [[ -d "$repo_root/k8s/overlays/prod-re-indicators" ]]; then
   kubectl kustomize "$repo_root/k8s/overlays/prod-re-indicators" >/dev/null
 fi
 
+for name in dev-see-impacts prod-see-impacts dev-calculations prod-calculations; do
+  echo "Validating Kustomize $name overlay rendering"
+  kubectl kustomize "$repo_root/k8s/overlays/$name" >/dev/null
+done
+
 echo "Validating rendered Kubernetes catalog shape"
 validate_rendered_catalog_shape
 
-if kubectl get namespace "$namespace" >/dev/null 2>&1; then
-  echo "Waiting for previous $namespace deletion"
-  kubectl delete namespace "$namespace" >/dev/null 2>&1 || true
-  wait_for_namespace_absent "$namespace" 120
+if ! kubectl create namespace "$namespace" >/dev/null; then
+  echo "Could not create a fresh $namespace; refusing to modify an existing deployment" >&2
+  exit 1
 fi
 
+resources_applied=true
 echo "Applying Kubernetes $overlay_name overlay"
 kubectl apply -k "$overlay_dir" >/dev/null
 
 echo "Waiting for hex-core-service rollout"
 kubectl rollout status deployment/hex-core-service -n "$namespace" --timeout=180s
 
-if [[ "$overlay_name" == *"re-indicators"* ]]; then
+if [[ "$overlay_name" == *"re-indicators"* || "$overlay_name" == *"calculations"* ]]; then
   echo "Waiting for re-indicators-calculation-service rollout"
   kubectl rollout status deployment/re-indicators-calculation-service -n "$namespace" --timeout=180s
+fi
+if [[ "$overlay_name" == *"see-impacts"* || "$overlay_name" == *"calculations"* ]]; then
+  echo "Waiting for see-impacts-calculation-service rollout"
+  kubectl rollout status deployment/see-impacts-calculation-service -n "$namespace" --timeout=300s
 fi
 
 echo "Port-forwarding hex-core-service"
@@ -303,7 +325,7 @@ if ! wait_for_http_code "http://127.0.0.1:18080/models" "200" "30"; then
 fi
 fi
 
-if [[ "$overlay_name" == *"re-indicators"* ]]; then
+if [[ "$overlay_name" == *"re-indicators"* || "$overlay_name" == *"calculations"* ]]; then
   echo "Port-forwarding re-indicators-calculation-service"
   kubectl port-forward -n "$namespace" service/re-indicators-calculation-service 18081:8081 >/tmp/dp-k8s-re-indicators-port-forward.log 2>&1 &
   calc_port_forward_pid="$!"
@@ -324,6 +346,25 @@ if [[ "$overlay_name" == *"re-indicators"* ]]; then
       k8s_logs_on_failure
       exit 1
     fi
+  fi
+fi
+
+if [[ "$overlay_name" == *"see-impacts"* || "$overlay_name" == *"calculations"* ]]; then
+  echo "Port-forwarding see-impacts-calculation-service"
+  kubectl port-forward -n "$namespace" service/see-impacts-calculation-service 18084:8080 >/tmp/dp-k8s-see-impacts-port-forward.log 2>&1 &
+  see_port_forward_pid="$!"
+  sleep 3
+  if ! wait_for_http_code "http://127.0.0.1:18084/capabilities" "200" "180"; then
+    k8s_logs_on_failure
+    exit 1
+  fi
+  see_check_args=(--service-url "http://127.0.0.1:18084" --catalog "$repo_root/compose/registry/catalog.json")
+  if [[ "$skip_authenticated_checks" == "false" || -n "${SEE_IMPACTS_HEX_CORE_BEARER_TOKEN:-}" ]]; then
+    see_check_args+=(--hex-core-url "http://127.0.0.1:18080")
+  fi
+  if ! python3 "$repo_root/scripts/validate_see_service.py" "${see_check_args[@]}"; then
+    k8s_logs_on_failure
+    exit 1
   fi
 fi
 

@@ -11,14 +11,17 @@ The template is opinionated:
 - Kubernetes with Kustomize is part of the production template target.
 - The default deployment mode points `hex-core-service` to an externally managed `io-adapter`.
 - The default registry configuration is a local pinned catalog file with explicit artifact URLs for CE-RISE models published on Codeberg over HTTPS.
-- Optional downstream services may be added beside `hex-core-service` through isolated profiles without changing the baseline core and `io-adapter` contract.
+- Optional RE Indicators and SEE Impacts calculation services run beside `hex-core-service` through isolated Compose profiles or Kubernetes overlays, separately or together.
 
 This repository documents and scaffolds deployment structure, configuration, and operational expectations.
 It does not bundle a default adapter implementation or a demo stack.
 
+The SEE Impacts extension uses the released `v0.0.1` image, including its BONSAI background and fixed Environmental Footprint (EF) 3.1 characterization factors. It calculates environmental impacts from CE-RISE Product System and LCI Dataset records and returns an Integrated LCA record. The required models are registered in the supplied catalogs; no separate background-data download is needed.
+
 Documentation:
 
 - [Template documentation](https://ce-rise-software.codeberg.page/dp-system-gitops-template/)
+- [Optional services and deployment commands](https://ce-rise-software.codeberg.page/dp-system-gitops-template/extensions.html)
 
 ## License
 

@@ -34,10 +34,41 @@ services:
     ports:
       - "${RE_INDICATORS_CALC_PORT}:8081"
 
+  see-impacts-calculation-service:
+    profiles:
+      - see-impacts
+    image: ${SEE_IMPACTS_CALC_IMAGE:-rg.fr-par.scw.cloud/ce-rise-software/see-impacts-calculation:v0.0.1}
+    restart: unless-stopped
+    depends_on:
+      hex-core-service:
+        condition: service_started
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
+    environment:
+      HEX_CORE_BASE_URL: ${SEE_IMPACTS_HEX_CORE_BASE_URL:-http://hex-core-service:8080}
+      HEX_CORE_BEARER_TOKEN: ${SEE_IMPACTS_HEX_CORE_BEARER_TOKEN:-}
+      HTTP_TIMEOUT_SECS: ${SEE_IMPACTS_HTTP_TIMEOUT_SECS:-30}
+      CALCULATION_TIMEOUT_SECS: ${SEE_IMPACTS_CALCULATION_TIMEOUT_SECS:-900}
+      MAX_CONCURRENT_CALCULATIONS: ${SEE_IMPACTS_MAX_CONCURRENT_CALCULATIONS:-2}
+      BRIGHTWAY_WORKSPACE_DIR: /var/lib/see-impacts/brightway
+    ports:
+      - "127.0.0.1:${SEE_IMPACTS_CALC_PORT:-8084}:8080"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/capabilities', timeout=20).read()"
+      interval: 30s
+      timeout: 25s
+      retries: 3
+      start_period: 30s
+
   # Optional extension point for adopters who want to run an adapter in the same stack.
   # The baseline template expects IO_ADAPTER_BASE_URL to point to an external adapter.
   io-adapter:
     profiles:
       - internal-adapter
-    image: ${IO_ADAPTER_IMAGE:-rg.fr-par.scw.cloud/ce-rise-software/dp-storage-jsondb:latest}
+    image: ${IO_ADAPTER_IMAGE:-rg.fr-par.scw.cloud/ce-rise-software/dp-storage-jsondb:v0.0.1}
     restart: unless-stopped

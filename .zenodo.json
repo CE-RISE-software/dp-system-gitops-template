@@ -17,7 +17,7 @@
         "Digital Product Passport",
         "Digital Material Passport"
     ],
-    "notes": "v0.0.2 - Added template extensions for optional RE indicators deployment.",
+    "notes": "v0.0.3 - Added SEE Impacts deployment and combined calculation-service configurations.",
     "communities": [{ "identifier": "ce-rise" }, { "identifier": "impact" }],
     "grants": [{ "id": "101092281" }],
     "related_identifiers": [

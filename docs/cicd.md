@@ -1,7 +1,6 @@
 # CI/CD
 
-This repository should keep release discipline and documentation publishing simple.
-Validation of deployment scaffolding is currently treated as a local operator task rather than a Forgejo runner responsibility.
+Deployment validation runs locally against the published images. The Forgejo workflow publishes documentation; it does not start a deployment or run environmental assessments.
 
 ## Local validation
 
@@ -9,38 +8,49 @@ Validation of deployment scaffolding is currently treated as a local operator ta
 - run a local Compose smoke test against the published image
 - validate Kustomize rendering
 - run a local Kubernetes smoke test against the dev overlay
-- run shell checks if scripts are added
+- run the validation-helper tests with Python's standard library
 
 Repository entry points:
 
-- [`Makefile`](/home/riccardo/code/CE-RISE-software/dp-system-gitops-template/Makefile)
-- [`scripts/validate-local-compose.sh`](/home/riccardo/code/CE-RISE-software/dp-system-gitops-template/scripts/validate-local-compose.sh)
-- [`scripts/validate-local-kubernetes.sh`](/home/riccardo/code/CE-RISE-software/dp-system-gitops-template/scripts/validate-local-kubernetes.sh)
+- `Makefile`
+- `scripts/validate-local-compose.sh`
+- `scripts/validate-local-kubernetes.sh`
+- `scripts/validate_see_service.py`
 
 Useful local targets:
 
 - `make validate`
+- `make validate-helpers`
 - `make validate-compose`
 - `make validate-compose-re-indicators`
+- `make validate-compose-see-impacts`
+- `make validate-compose-calculations`
 - `make validate-kubernetes`
 - `make validate-kubernetes-re-indicators`
+- `make validate-kubernetes-see-impacts`
+- `make validate-kubernetes-calculations`
+
+SEE deployment checks cover background access, method availability, and the required schemas in HEX Core. They do not run the full calculation example. The helper tests also check failure reporting and that validation cannot overwrite the operator's Compose environment or remove an existing Kubernetes deployment.
 
 For production-oriented overlays, local validation currently proves deployment and health. End-to-end authenticated functional checks still require real auth infrastructure and credentials.
 
 The local validation scripts assume:
 
 - Docker or a compatible Compose provider is installed
+- Python 3 and `curl` are installed
 - `kubectl` is installed
 - a local Kubernetes cluster is available for the Kubernetes smoke test
 - Podman/Docker networking allows outbound DNS and HTTPS from the runtime containers
 
-## Release discipline
+## Versioned dependencies
 
-- update pinned image references as part of template releases
-- update pinned model catalog versions as part of template releases
-- avoid floating `latest` references in release-ready examples
+Service image references are pinned to the published releases listed in [Configuration](configuration.md#images), consistently across Compose and Kubernetes. Model entries use versioned Codeberg artifact URLs in both catalogs. Keep both deployment formats and model catalogs aligned when updating these dependencies.
 
 ## Documentation publishing
 
 The repository uses `mdBook` for documentation publishing.
 The existing pages workflow can publish the generated site from `docs/`.
+
+## Release archival
+
+The GitHub mirror creates an archival release when a version tag is pushed. Its release notes are extracted automatically from the matching version heading in `CHANGELOG.md`, with the leading `v` removed from the tag for matching. Missing, duplicate, or empty entries stop release creation. The workflow also links to the canonical Codeberg repository and documentation; it does not build container images, SDKs, or API artifacts.

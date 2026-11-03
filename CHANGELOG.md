@@ -2,7 +2,18 @@
 
 All notable changes to the CE-RISE DP System GitOps Template project will be documented in this file.
 
-## [0.0.2] - unreleased
+## [0.0.3] - 11-03-2026
+
+### Added
+- Optional SEE Impacts deployment with Compose and Kubernetes, separately or together with RE Indicators
+- Product System, LCI Dataset, and Integrated LCA entries in both model catalogs
+- SEE readiness and schema availability checks, with validation-helper tests
+
+### Changed
+- Isolated local validation to preserve existing Compose configuration and Kubernetes deployments
+- Pinned service images and updated deployment, configuration, and operations documentation
+
+## [0.0.2] - 04-16-2026
 
 ### Added
 - Optional Compose profile for `re-indicators-calculation-service`
@@ -10,7 +21,7 @@ All notable changes to the CE-RISE DP System GitOps Template project will be doc
 - Isolated Kustomize overlays for `dev-re-indicators` and `prod-re-indicators`
 - Local Compose validation target for the optional RE indicators path
 - Local Kubernetes validation target for the optional RE indicators path
-- Documentation page for optional template extensions in [`docs/extensions.md`](/home/riccardo/code/CE-RISE-software/dp-system-gitops-template/docs/extensions.md)
+- Documentation page for optional template extensions in [`docs/extensions.md`](docs/extensions.md)
 
 ### Changed
 - Updated the shipped model catalog to use `re-indicators-specification` version `0.0.5`
@@ -25,6 +36,6 @@ All notable changes to the CE-RISE DP System GitOps Template project will be doc
 - Initial deployment template structure for Docker Compose and Kubernetes with Kustomize
 - Environment-driven `hex-core-service` deployment baseline with external `io-adapter` as the default mode
 - Pinned local registry catalog for CE-RISE model artifacts using explicit artifact URLs
-- Local Compose smoke validator in [`scripts/validate-local-compose.sh`](/home/riccardo/code/CE-RISE-software/dp-system-gitops-template/scripts/validate-local-compose.sh)
-- Local Kubernetes smoke validator in [`scripts/validate-local-kubernetes.sh`](/home/riccardo/code/CE-RISE-software/dp-system-gitops-template/scripts/validate-local-kubernetes.sh)
+- Local Compose smoke validator in [`scripts/validate-local-compose.sh`](scripts/validate-local-compose.sh)
+- Local Kubernetes smoke validator in [`scripts/validate-local-kubernetes.sh`](scripts/validate-local-kubernetes.sh)
 - Makefile entry points for local template validation

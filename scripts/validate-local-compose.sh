@@ -2,14 +2,14 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-compose_dir="$repo_root/compose"
+compose_source="$repo_root/compose"
+compose_dir="$(mktemp -d /tmp/dp-template-compose.XXXXXX)"
 compose_env="$compose_dir/.env"
+compose_project="dp-template-validation-$$"
 compose_profiles="${COMPOSE_PROFILES:-}"
-sample_re_indicators_payload="/tmp/re-indicators-sample-payload.json"
+sample_re_indicators_payload="$compose_dir/re-indicators-payload.json"
 
-# This local smoke test depends on working external DNS from inside the
-# rootless Podman container. On this workstation that required switching
-# Podman rootless networking to slirp4netns and resetting Podman state.
+# Keep validation configuration and containers separate from operator deployments.
 run_compose() {
   local args=()
   local profile=""
@@ -23,25 +23,20 @@ run_compose() {
     done
     (
       cd "$compose_dir"
-      docker compose "${expanded[@]}" "$@"
+      docker compose --project-name "$compose_project" "${expanded[@]}" "$@"
     )
     return
   fi
 
   (
     cd "$compose_dir"
-    docker compose "$@"
+    docker compose --project-name "$compose_project" "$@"
   )
 }
 
 cleanup() {
   run_compose down --remove-orphans >/dev/null 2>&1 || true
-  if command -v podman >/dev/null 2>&1; then
-    podman rm -f compose_hex-core-service_1 >/dev/null 2>&1 || true
-    podman rm -f compose_re-indicators-calculation-service_1 >/dev/null 2>&1 || true
-    podman network rm -f compose_default >/dev/null 2>&1 || true
-  fi
-  rm -f "$sample_re_indicators_payload"
+  rm -rf "$compose_dir"
 }
 
 wait_for_http_code() {
@@ -55,7 +50,7 @@ wait_for_http_code() {
 
   while true; do
     curl_stderr="$(mktemp)"
-    code="$(curl -sS -o /tmp/dp-validator-body.json -w '%{http_code}' "$url" 2>"$curl_stderr" || true)"
+    code="$(curl -sS --connect-timeout 5 --max-time 30 -o /tmp/dp-validator-body.json -w '%{http_code}' "$url" 2>"$curl_stderr" || true)"
     if [[ "$code" == "$expected" ]]; then
       rm -f "$curl_stderr"
       return 0
@@ -85,6 +80,10 @@ compose_logs_on_failure() {
     echo "re-indicators-calculation-service logs:" >&2
     run_compose logs re-indicators-calculation-service >&2 || true
   fi
+  if [[ ",$compose_profiles," == *",see-impacts,"* ]]; then
+    echo "see-impacts-calculation-service logs:" >&2
+    run_compose logs see-impacts-calculation-service >&2 || true
+  fi
 }
 
 compose_up_services() {
@@ -92,6 +91,9 @@ compose_up_services() {
 
   if [[ ",$compose_profiles," == *",re-indicators,"* ]]; then
     services+=("re-indicators-calculation-service")
+  fi
+  if [[ ",$compose_profiles," == *",see-impacts,"* ]]; then
+    services+=("see-impacts-calculation-service")
   fi
 
   run_compose up -d "${services[@]}" >/dev/null
@@ -181,7 +183,7 @@ run_re_indicators_compute_check() {
 
   write_re_indicators_payload
   status="$(curl -sS -o /tmp/re-indicators-compute-response.json -w '%{http_code}' \
-    -X POST "http://127.0.0.1:8083/compute" \
+    -X POST "http://127.0.0.1:${RE_INDICATORS_CALC_PORT:-8083}/compute" \
     -H "Content-Type: application/json" \
     --data-binary @"$sample_re_indicators_payload")"
 
@@ -230,16 +232,14 @@ PY
 }
 
 echo "Preparing local Compose environment"
-cp "$compose_dir/.env.example" "$compose_env"
+trap cleanup EXIT
+cp "$compose_source/docker-compose.yml" "$compose_dir/docker-compose.yml"
+cp -R "$compose_source/registry" "$compose_dir/registry"
+cp "$compose_source/.env.example" "$compose_env"
 cat >>"$compose_env" <<'EOF'
 AUTH_MODE=none
 AUTH_ALLOW_INSECURE_NONE=true
 EOF
-
-trap cleanup EXIT
-
-echo "Cleaning any previous local Compose stack"
-cleanup
 
 echo "Validating local catalog shape"
 validate_catalog_shape
@@ -251,21 +251,21 @@ echo "Running Docker Compose smoke test"
 compose_up_services
 
 echo "Waiting for Docker Compose health endpoint"
-if ! wait_for_http_code "http://127.0.0.1:8080/admin/health" "200" "90"; then
+if ! wait_for_http_code "http://127.0.0.1:${HEX_CORE_PORT:-8080}/admin/health" "200" "90"; then
   echo "Docker Compose health check failed" >&2
   compose_logs_on_failure
   exit 1
 fi
 
 echo "Waiting for Docker Compose readiness endpoint"
-if ! wait_for_http_code "http://127.0.0.1:8080/admin/ready" "200" "90"; then
+if ! wait_for_http_code "http://127.0.0.1:${HEX_CORE_PORT:-8080}/admin/ready" "200" "90"; then
   echo "Docker Compose readiness check failed" >&2
   compose_logs_on_failure
   exit 1
 fi
 
 echo "Checking Docker Compose model listing"
-if ! wait_for_http_code "http://127.0.0.1:8080/models" "200" "30"; then
+if ! wait_for_http_code "http://127.0.0.1:${HEX_CORE_PORT:-8080}/models" "200" "30"; then
   echo "Docker Compose model listing failed" >&2
   compose_logs_on_failure
   exit 1
@@ -273,7 +273,7 @@ fi
 
 if [[ ",$compose_profiles," == *",re-indicators,"* ]]; then
   echo "Waiting for RE indicators calculation service health endpoint"
-  if ! wait_for_http_code "http://127.0.0.1:8083/health" "200" "90"; then
+  if ! wait_for_http_code "http://127.0.0.1:${RE_INDICATORS_CALC_PORT:-8083}/health" "200" "90"; then
     echo "RE indicators calculation service health check failed" >&2
     compose_logs_on_failure
     exit 1
@@ -281,6 +281,22 @@ if [[ ",$compose_profiles," == *",re-indicators,"* ]]; then
 
   echo "Checking sample RE indicators compute flow"
   if ! run_re_indicators_compute_check; then
+    compose_logs_on_failure
+    exit 1
+  fi
+fi
+
+if [[ ",$compose_profiles," == *",see-impacts,"* ]]; then
+  see_url="http://127.0.0.1:${SEE_IMPACTS_CALC_PORT:-8084}"
+  echo "Waiting for SEE impacts calculation service readiness"
+  if ! wait_for_http_code "$see_url/capabilities" "200" "180"; then
+    compose_logs_on_failure
+    exit 1
+  fi
+  if ! python3 "$repo_root/scripts/validate_see_service.py" \
+    --service-url "$see_url" \
+    --hex-core-url "http://127.0.0.1:${HEX_CORE_PORT:-8080}" \
+    --catalog "$compose_dir/registry/catalog.json"; then
     compose_logs_on_failure
     exit 1
   fi

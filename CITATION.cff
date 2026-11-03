@@ -1,4 +1,6 @@
 cff-version: 1.2.0
+message: >-
+  v0.0.3 - Added SEE Impacts deployment and combined calculation-service configurations.
 title: CE-RISE Digital Passport System GitOps Template
 type: software
 doi: 10.5281/zenodo.19050358

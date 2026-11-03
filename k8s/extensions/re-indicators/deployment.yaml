@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: re-indicators-calculation-service
-          image: rg.fr-par.scw.cloud/ce-rise-software/re-indicators-calculation:latest
+          image: rg.fr-par.scw.cloud/ce-rise-software/re-indicators-calculation:v0.0.1
           ports:
             - containerPort: 8081
           envFrom:

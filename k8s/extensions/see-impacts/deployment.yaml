@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: see-impacts-calculation-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: see-impacts-calculation-service
+  template:
+    metadata:
+      labels:
+        app: see-impacts-calculation-service
+    spec:
+      securityContext:
+        fsGroup: 1000
+      containers:
+        - name: see-impacts-calculation-service
+          image: rg.fr-par.scw.cloud/ce-rise-software/see-impacts-calculation:v0.0.1
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: see-impacts-env
+            - secretRef:
+                name: see-impacts-auth
+                optional: true
+          volumeMounts:
+            - name: brightway-workspace
+              mountPath: /var/lib/see-impacts/brightway
+          resources:
+            requests:
+              cpu: "1"
+              memory: 2Gi
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 30
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            periodSeconds: 30
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /capabilities
+              port: 8080
+            periodSeconds: 30
+            timeoutSeconds: 30
+      volumes:
+        - name: brightway-workspace
+          emptyDir: {}
