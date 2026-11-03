@@ -1,25 +1,12 @@
 # Optional Extensions
 
-This template may be expanded with optional downstream services without changing the baseline deployment contract between `hex-core-service` and the configured `io-adapter`.
+Optional application services are enabled through Compose profiles or Kustomize overlays. They connect to `hex-core-service` without changing the baseline core-to-adapter deployment contract. Container versions are listed in [Configuration](configuration.md#images).
 
 ## RE indicators calculation service
 
 The Compose template includes an optional `re-indicators` profile that adds `re-indicators-calculation-service`.
 
-This service:
-
-- depends on `hex-core-service`
-- validates RE indicators payloads through the core service
-- resolves its own published RE indicators artifacts
-- does not talk to the `io-adapter` directly as part of the template contract
-
-Relevant configuration in `compose/.env.example`:
-
-- `RE_INDICATORS_CALC_IMAGE`
-- `RE_INDICATORS_CALC_PORT`
-- `RE_INDICATORS_HEX_CORE_BASE_URL`
-- `RE_INDICATORS_ARTIFACT_BASE_URL_TEMPLATE`
-- `RE_INDICATORS_HTTP_TIMEOUT_SECS`
+It connects to HEX Core over the Compose network and publishes container port `8081` on host port `8083` by default. Configure its image, host port, core endpoint, artifact endpoint, and HTTP timeout using the [RE Indicators settings](configuration.md#re-indicators).
 
 Typical local commands:
 
@@ -35,9 +22,7 @@ The service is deployed only when its profile or overlay is selected.
 
 ## SEE impacts calculation service
 
-The `see-impacts` profile adds `see-impacts-calculation-service` using `rg.fr-par.scw.cloud/ce-rise-software/see-impacts-calculation:v0.0.1`. The image includes the BONSAI background and fixed Environmental Footprint (EF) 3.1 characterization factors. Each request supplies its own foreground records and functional unit; no product-specific Brightway project is required from the caller.
-
-The service uses HEX Core to validate Product System and LCI Dataset inputs and its Integrated LCA output. A successful request returns all 25 configured impact indicators in one result record. See the [SEE service documentation](https://ce-rise-software.codeberg.page/see-impacts-calculation-service/) for request fields, background references, and result structure.
+The `see-impacts` profile adds `see-impacts-calculation-service`. It connects to HEX Core over the Compose network and publishes container port `8080` at `127.0.0.1:8084` by default. Configure its image, host port, core endpoint, credentials, timeouts, and concurrency using the [SEE settings](configuration.md#see-impacts).
 
 From the repository root, after configuring `compose/.env`:
 
@@ -47,9 +32,9 @@ docker compose --profile see-impacts up -d
 curl --fail http://localhost:8084/capabilities
 ```
 
-SEE listens on container port `8080`, published at `127.0.0.1:8084` by default. Other containers can reach it on the Compose network. Remote access requires an authenticated reverse proxy; the HEX Core bearer token does not authenticate incoming SEE requests. The Compose health check uses `/capabilities` to verify that the background can be opened. No background-data mount is needed. Request workspaces use writable temporary storage inside the container, not a required persistent volume.
+Other containers can reach SEE on the Compose network. Remote access requires an authenticated reverse proxy; the HEX Core bearer token does not authenticate incoming SEE requests. The Compose health check uses `/capabilities` to verify service initialization. Writable working storage is provided by the container's writable layer; no persistent volume is required.
 
-Configuration is listed in [Configuration](configuration.md). Set `SEE_IMPACTS_HEX_CORE_BEARER_TOKEN` when HEX Core requires authentication. SEE does not use the IO adapter directly or save returned results through it.
+Set `SEE_IMPACTS_HEX_CORE_BEARER_TOKEN` when HEX Core requires authentication. Keep credentials out of version control.
 
 ## Kubernetes overlays
 
@@ -61,7 +46,14 @@ Configuration is listed in [Configuration](configuration.md). Set `SEE_IMPACTS_H
 
 Each overlay combines the appropriate baseline with resources under `k8s/extensions/`. The combined overlays include the core only once. The baseline `dev` and `prod` overlays remain independent of both calculation services.
 
-For SEE, the extension provides a ClusterIP service on port `8080`, startup and liveness checks at `/health`, and readiness at `/capabilities`. An `emptyDir` volume holds temporary Brightway workspaces. The deployment requests one CPU and 2 GiB of memory; adjust resources, concurrency, and available temporary disk space for the expected workload.
+Both extensions provide ClusterIP services and ConfigMaps:
+
+| Extension | Service Port | ConfigMap | Pod Probes |
+| --- | --- | --- | --- |
+| RE Indicators | `8081` | `re-indicators-env` | No pod probes configured |
+| SEE Impacts | `8080` | `see-impacts-env` | Startup and liveness: `/health`; readiness: `/capabilities` |
+
+SEE mounts an `emptyDir` at `/var/lib/see-impacts/brightway` for temporary working storage. The deployment requests one CPU and 2 GiB of memory. Adjust resources, concurrency, and temporary disk space for the expected workload. The RE Indicators extension does not set resource requests or mount working volumes.
 
 The `see-impacts-env` ConfigMap supplies the core URL, timeouts, concurrency, and workspace path. For authenticated deployments, create a `see-impacts-auth` Secret in the selected namespace with a `HEX_CORE_BEARER_TOKEN` key. Manage this secret through your deployment's secret-management mechanism, not a committed token.
 
@@ -93,4 +85,11 @@ make validate-kubernetes-see-impacts
 make validate-kubernetes-calculations
 ```
 
-These checks verify service startup, access to the bundled BONSAI and EF 3.1 databases, method availability, and the three required schemas served by HEX Core. They do not run a full environmental assessment. The combined checks also run the existing RE Indicators calculation check. See [Operations](operations.md) for test isolation and production authentication requirements.
+These checks verify deployment rendering, service startup, initialization responses, and required schema availability through HEX Core. The RE Indicators and combined targets also perform an API smoke request. See [Operations](operations.md) for exact coverage, test isolation, and production authentication requirements.
+
+## Component Documentation
+
+Use the component documentation for API usage and service-specific behavior:
+
+- [RE Indicators documentation](https://ce-rise-software.codeberg.page/re-indicators-calculation-service/)
+- [SEE Impacts documentation](https://ce-rise-software.codeberg.page/see-impacts-calculation-service/)

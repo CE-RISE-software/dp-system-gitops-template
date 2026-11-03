@@ -19,17 +19,13 @@ docker compose config
 docker compose up -d
 ```
 
-Add SEE with its optional profile:
+Select optional application services with profiles, from `compose/`:
 
-```bash
-docker compose --profile see-impacts up -d
-```
-
-Or run both calculation services alongside the same core:
-
-```bash
-docker compose --profile re-indicators --profile see-impacts up -d
-```
+| Services Alongside Core | Start Command |
+| --- | --- |
+| RE Indicators | `docker compose --profile re-indicators up -d` |
+| SEE Impacts | `docker compose --profile see-impacts up -d` |
+| Both | `docker compose --profile re-indicators --profile see-impacts up -d` |
 
 The default host ports are `8080` for HEX Core, `8083` for RE Indicators, and `8084` for SEE Impacts. SEE is bound to `127.0.0.1`, so its published port is accessible only from the deployment host. Other containers reach it through the Compose network. Use the corresponding port variables in `.env` to change the port numbers. When inspecting or stopping optional services, select the same profiles.
 
@@ -41,14 +37,14 @@ For remote SEE access, configure an authenticated reverse proxy. The service's H
 - Secret handling is part of the production template path.
 - Operators may replace plain secret manifests with Sealed Secrets, SOPS, or external secret managers.
 
-The baseline resources are in `k8s/base`, with environment configuration in `k8s/overlays/dev` and `k8s/overlays/prod`. Render the selected overlay before applying it. From the repository root, for SEE in a development namespace:
+The baseline resources are in `k8s/base`, with environment configuration in `k8s/overlays/dev` and `k8s/overlays/prod`. Render the selected overlay before applying it. From the repository root, for the baseline development deployment:
 
 ```bash
-kubectl kustomize k8s/overlays/dev-see-impacts
-kubectl apply -k k8s/overlays/dev-see-impacts
+kubectl kustomize k8s/overlays/dev
+kubectl apply -k k8s/overlays/dev
 ```
 
-Use `dev-calculations` for both services. The corresponding production overlays are `prod-see-impacts` and `prod-calculations`; configure their auth and adapter settings before applying them. All SEE services are cluster-internal by default. Configure an authenticated ingress or reverse proxy separately if external access is needed.
+Choose application-service overlays from [Optional Extensions](extensions.md#kubernetes-overlays). Each combines the selected environment's core deployment with the requested services. Application services use ClusterIP networking; configure authenticated ingress or a reverse proxy separately for external access.
 
 ## Adapter deployment modes
 
@@ -64,7 +60,7 @@ The template may also host optional services that sit beside `hex-core-service` 
 - Their required models are registered in the supplied versioned catalogs.
 - Both can be deployed together without duplicating the core resources.
 
-SEE includes its BONSAI background and EF 3.1 factors in the released image. Every calculation uses an isolated temporary Brightway project. No background-data mount, caller-supplied Brightway project, or persistent volume is required. Kubernetes uses an `emptyDir` workspace and requests one CPU and 2 GiB of memory for SEE. Allow sufficient temporary disk space for concurrent background copies and adjust resources for your assessments.
+Extension resources define service ports, probes, resource requests, and temporary storage. SEE requests one CPU and 2 GiB of memory and mounts an `emptyDir` workspace. Size temporary storage and concurrency for the deployment. [Optional Extensions](extensions.md) lists these settings for each service.
 
 When core authentication is enabled, configure the SEE bearer token using the Compose variable or Kubernetes Secret described in [Configuration](configuration.md). See [Optional Extensions](extensions.md) for all service combinations.
 
@@ -88,7 +84,7 @@ The production overlay supplies:
 - example auth secret manifest
 - replica count and resource requests/limits
 
-This overlay is still a template starting point. Operators are expected to replace example secret material and environment-specific endpoints.
+Set environment-specific adapter and identity-provider endpoints and supply managed credentials before deployment.
 
 ## Network assumptions
 

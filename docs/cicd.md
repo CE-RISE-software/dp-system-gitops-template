@@ -1,6 +1,6 @@
 # CI/CD
 
-Deployment validation runs locally against the published images. The Forgejo workflow publishes documentation; it does not start a deployment or run environmental assessments.
+Deployment validation runs locally against the published images. The Forgejo workflow publishes this template's documentation; it does not deploy a running stack.
 
 ## Local validation
 
@@ -30,7 +30,7 @@ Useful local targets:
 - `make validate-kubernetes-see-impacts`
 - `make validate-kubernetes-calculations`
 
-SEE deployment checks cover background access, method availability, and the required schemas in HEX Core. They do not run the full calculation example. The helper tests also check failure reporting and that validation cannot overwrite the operator's Compose environment or remove an existing Kubernetes deployment.
+Deployment checks cover configuration rendering, service readiness, initialization, and access to required core schemas. [Operations](operations.md#validation-coverage) documents the checks for each service. The helper tests also check failure reporting and that validation cannot overwrite the operator's Compose environment or remove an existing Kubernetes deployment.
 
 For production-oriented overlays, local validation currently proves deployment and health. End-to-end authenticated functional checks still require real auth infrastructure and credentials.
 

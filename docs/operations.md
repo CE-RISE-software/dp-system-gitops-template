@@ -22,11 +22,20 @@ Typical checks include:
 
 The validator creates a temporary configuration and a uniquely named Compose project, then removes its own containers on exit. It does not overwrite `compose/.env` or stop an operator's stack. Ports still need to be free; use `HEX_CORE_PORT`, `RE_INDICATORS_CALC_PORT`, and `SEE_IMPACTS_CALC_PORT` in the shell environment to select alternative validation ports. The validation core uses development-only unauthenticated mode.
 
-To inspect an existing SEE deployment, run from `compose/`:
+To inspect the baseline deployment, run from `compose/`:
 
 ```bash
-docker compose --profile see-impacts ps
-docker compose --profile see-impacts logs see-impacts-calculation-service
+docker compose ps
+docker compose logs hex-core-service
+curl --fail http://localhost:8080/admin/health
+```
+
+For deployments with both application services:
+
+```bash
+docker compose --profile re-indicators --profile see-impacts ps
+docker compose --profile re-indicators --profile see-impacts logs re-indicators-calculation-service see-impacts-calculation-service
+curl --fail http://localhost:8083/health
 curl --fail http://localhost:8084/health
 curl --fail http://localhost:8084/capabilities
 curl --fail http://localhost:8084/methods
@@ -46,26 +55,35 @@ Typical checks include:
 
 The Kubernetes validator needs a running cluster and permission to create resources. It creates the selected namespace (`dp-system-dev` or `dp-system-prod`) and removes its resources on exit. It refuses to proceed if that namespace already exists, so it cannot be run against an existing deployment. Use `kubectl kustomize` for rendering-only checks without a cluster.
 
-For example, to inspect an existing development SEE deployment:
+To inspect an existing development deployment:
 
 ```bash
 kubectl get pods -n dp-system-dev
+kubectl logs -n dp-system-dev deployment/hex-core-service
+```
+
+When the corresponding application services are enabled:
+
+```bash
+kubectl logs -n dp-system-dev deployment/re-indicators-calculation-service
 kubectl logs -n dp-system-dev deployment/see-impacts-calculation-service
 kubectl port-forward -n dp-system-dev service/see-impacts-calculation-service 18084:8080
 ```
 
 With the port forward running, the SEE endpoints are available at `http://localhost:18084`.
 
-## SEE validation coverage
+## Validation Coverage
 
-The SEE checks verify:
+The baseline checks render the deployment configuration, start HEX Core, and check health. Development validation also checks core readiness and model listing. Production authentication requirements are described below.
 
-- `/health` identifies a healthy SEE service.
-- `/capabilities` opens the bundled `BONSAI` and `ef31_biosphere` databases.
-- `/methods` returns non-empty, unique method identifiers with consistent counts.
-- HEX Core serves the catalog's Product System, LCI Dataset, and Integrated LCA schemas.
+Application-service checks add:
 
-These are deployment-readiness checks, not an environmental calculation or numerical benchmark. Combined-service targets also run the existing RE Indicators compute check. Full calculation tests are maintained with the SEE service.
+| Service | Checks |
+| --- | --- |
+| RE Indicators | `/health`; development validation also sends a `POST /compute` smoke request through its core connection |
+| SEE Impacts | `/health`, `/capabilities`, and `/methods` initialization responses; required schemas available through HEX Core |
+
+The SEE validator checks service identity, initialization metadata, non-empty and consistent method registration, and the schema versions in the supplied catalog. Combined targets run both sets of application-service checks.
 
 Production Kubernetes validation checks service readiness without authenticated core requests by default. Set `SEE_IMPACTS_HEX_CORE_BEARER_TOKEN` in the validator's shell environment to also check the three schemas against an authenticated core. That variable authenticates the validator only; configuring the running SEE service still requires the Kubernetes Secret. A reachable identity provider and valid core authentication settings are required for those requests to succeed.
 
@@ -84,7 +102,7 @@ Common deployment failures are likely to come from:
 - registry catalog mismatch or invalid artifact URLs
 - blocked network egress
 - image tag drift
-- insufficient writable workspace or resources for SEE calculations
+- insufficient writable working storage or service resources
 - a missing or expired SEE bearer token when core authentication is enabled
 
 Production-oriented overlays may also appear healthy while still rejecting unauthenticated smoke traffic by design.

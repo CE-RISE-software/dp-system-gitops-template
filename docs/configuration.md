@@ -63,27 +63,37 @@ Recommended baseline:
 The template ships a pinned local catalog file with CE-RISE model entries.
 Those entries use explicit artifact references such as `schema_url` and `shacl_url` rather than a single inferred `base_url`.
 
-SEE uses the following entries in both the Compose catalog (`compose/registry/catalog.json`) and Kubernetes catalog (`k8s/base/registry-configmap.yaml`):
+The Compose catalog (`compose/registry/catalog.json`) and Kubernetes catalog (`k8s/base/registry-configmap.yaml`) register these model versions:
 
 | Model | Version |
 | --- | --- |
+| DP Record Metadata (`dp-record-metadata`) | `0.0.2` |
+| Product Profile (`product-profile`) | `0.0.3` |
+| Usage and Maintenance (`usage-and-maintenance`) | `0.0.2` |
+| RE Indicators Specification (`re-indicators-specification`) | `0.0.5` |
 | Product System (`product-system`) | `0.0.1` |
 | LCI Dataset (`lci-dataset`) | `0.0.1` |
 | Integrated LCA (`integrated-lca`) | `0.2.0` |
 
-Schema and SHACL URLs point to the corresponding versioned `pages-v` tags on Codeberg. Calculation requests must select model versions available in the deployed catalog. When updating these entries, keep both catalogs aligned.
+Schema and SHACL URLs point to the corresponding versioned `pages-v` tags on Codeberg. When updating registry configuration, keep the model identifiers, versions, and artifact URLs aligned in both catalogs. HEX Core needs outbound HTTPS access to the configured artifact hosts.
 
 ## Optional downstream services
 
 The baseline template does not require any downstream application service beside `hex-core-service`.
 
-If the optional `re-indicators` Compose profile is enabled, the following variables are also used:
+### RE Indicators
 
-- `RE_INDICATORS_CALC_IMAGE`
-- `RE_INDICATORS_CALC_PORT`
-- `RE_INDICATORS_HEX_CORE_BASE_URL`
-- `RE_INDICATORS_ARTIFACT_BASE_URL_TEMPLATE`
-- `RE_INDICATORS_HTTP_TIMEOUT_SECS`
+The `re-indicators` Compose profile reads these settings from `compose/.env` or the shell environment:
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `RE_INDICATORS_CALC_IMAGE` | `rg.fr-par.scw.cloud/ce-rise-software/re-indicators-calculation:v0.0.1` | Container image |
+| `RE_INDICATORS_CALC_PORT` | `8083` | Host port mapped to container port `8081` |
+| `RE_INDICATORS_HEX_CORE_BASE_URL` | `http://hex-core-service:8080` | Internal core endpoint |
+| `RE_INDICATORS_ARTIFACT_BASE_URL_TEMPLATE` | `https://ce-rise-models.codeberg.page/re-indicators-specification/generated/` | Artifact endpoint reachable by the service |
+| `RE_INDICATORS_HTTP_TIMEOUT_SECS` | `15` | Outgoing HTTP timeout in seconds |
+
+Compose maps the connection settings to `HEX_CORE_BASE_URL`, `ARTIFACT_BASE_URL_TEMPLATE`, and `HTTP_TIMEOUT_SECS`. Kubernetes uses these native names in the `re-indicators-env` ConfigMap.
 
 ### SEE Impacts
 
@@ -91,13 +101,13 @@ The `see-impacts` Compose profile reads these settings from `compose/.env` or th
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `SEE_IMPACTS_CALC_IMAGE` | `rg.fr-par.scw.cloud/ce-rise-software/see-impacts-calculation:v0.0.1` | Released service image, including the background and methods |
+| `SEE_IMPACTS_CALC_IMAGE` | `rg.fr-par.scw.cloud/ce-rise-software/see-impacts-calculation:v0.0.1` | Container image |
 | `SEE_IMPACTS_CALC_PORT` | `8084` | Loopback-only host port (`127.0.0.1`) mapped to container port `8080` |
-| `SEE_IMPACTS_HEX_CORE_BASE_URL` | `http://hex-core-service:8080` | Core endpoint for input and output validation |
+| `SEE_IMPACTS_HEX_CORE_BASE_URL` | `http://hex-core-service:8080` | Internal core endpoint |
 | `SEE_IMPACTS_HEX_CORE_BEARER_TOKEN` | Empty | Bearer token used for requests to HEX Core |
 | `SEE_IMPACTS_HTTP_TIMEOUT_SECS` | `30` | Timeout for each HEX Core HTTP request |
-| `SEE_IMPACTS_CALCULATION_TIMEOUT_SECS` | `900` | Time limit for a calculation worker |
-| `SEE_IMPACTS_MAX_CONCURRENT_CALCULATIONS` | `2` | Maximum concurrent calculation workers per service instance |
+| `SEE_IMPACTS_CALCULATION_TIMEOUT_SECS` | `900` | Calculation time limit in seconds |
+| `SEE_IMPACTS_MAX_CONCURRENT_CALCULATIONS` | `2` | Calculation concurrency per service instance |
 
 Compose maps the prefixed variables to the service's native variables: `HEX_CORE_BASE_URL`, `HEX_CORE_BEARER_TOKEN`, `HTTP_TIMEOUT_SECS`, `CALCULATION_TIMEOUT_SECS`, and `MAX_CONCURRENT_CALCULATIONS`.
 
@@ -105,7 +115,7 @@ The bearer token authenticates SEE's requests to HEX Core; it does not authentic
 
 Kubernetes uses those native names in the `see-impacts-env` ConfigMap and the optional `see-impacts-auth` Secret. Put `HEX_CORE_BEARER_TOKEN` in the Secret, not the ConfigMap. The prefixed Compose variables do not configure Kubernetes deployments.
 
-Both deployments set `BRIGHTWAY_WORKSPACE_DIR=/var/lib/see-impacts/brightway`. This directory must be writable and have space for concurrent copies of the bundled background. Kubernetes mounts an `emptyDir`; Compose uses the container's writable layer. No separate dataset mount or persistent volume is required. Characterization factors are fixed in the service image, not supplied through deployment variables or calculation requests.
+Both deployments set `BRIGHTWAY_WORKSPACE_DIR=/var/lib/see-impacts/brightway`. This is writable temporary working storage, not record persistence. Kubernetes mounts an `emptyDir`; Compose uses the container's writable layer. Allow enough temporary disk space for the configured concurrency. No persistent volume is required by the supplied extension.
 
 Keep `.env` files and token material out of version control. If requests pass through a reverse proxy, configure its response timeout to accommodate calculations up to the configured worker time limit.
 

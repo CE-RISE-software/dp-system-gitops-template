@@ -24,8 +24,9 @@ This is the normal template path.
 
 ## Optional internal adapter slot
 
-The template may include an extension point for running an adapter service alongside `hex-core-service`.
-That extension point must not become a hidden generic contract for all adapters.
+The `internal-adapter` Compose profile adds the `io-adapter` service alongside HEX Core. `IO_ADAPTER_IMAGE` selects its image. Add the environment settings, network access, and volumes required by the chosen adapter, then point `IO_ADAPTER_BASE_URL` to its internal HTTP endpoint.
+
+This service slot does not supply an adapter-specific database configuration. Use the selected adapter's deployment documentation for its dependencies, credentials, and storage. No adapter Deployment is included in the Kubernetes baseline.
 
 ## Adapter-specific concerns
 

@@ -5,23 +5,22 @@
 This repository provides a deployment template for a CE-RISE Digital Passport system instance.
 It is centered on `hex-core-service` as the stable application component and a pluggable HTTP `io-adapter` as the storage and integration boundary.
 
-The template is opinionated:
+The baseline deploys `hex-core-service` and connects it to an operator-selected HTTP IO adapter. Deployment configuration covers:
 
-- Docker Compose is the mandatory working baseline.
-- Kubernetes with Kustomize is part of the production template target.
-- The default deployment mode points `hex-core-service` to an externally managed `io-adapter`.
-- The default registry configuration is a local pinned catalog file with explicit artifact URLs for CE-RISE models published on Codeberg over HTTPS.
-- Optional RE Indicators and SEE Impacts calculation services run beside `hex-core-service` through isolated Compose profiles or Kubernetes overlays, separately or together.
+- Docker Compose and development/production Kubernetes overlays using Kustomize.
+- Pinned container images and a local catalog of versioned model artifacts.
+- Adapter endpoints, authentication, secrets, ports, and service configuration.
+- Optional RE Indicators and SEE Impacts services, enabled separately or together.
+- Local deployment checks, service readiness, logs, and resource configuration.
 
-This repository documents and scaffolds deployment structure, configuration, and operational expectations.
-It does not bundle a default adapter implementation or a demo stack.
-
-The SEE Impacts extension uses the released `v0.0.1` image, including its BONSAI background and fixed Environmental Footprint (EF) 3.1 characterization factors. It calculates environmental impacts from CE-RISE Product System and LCI Dataset records and returns an Integrated LCA record. The required models are registered in the supplied catalogs; no separate background-data download is needed.
+The default adapter is managed outside the stack. An optional Compose service slot supports an adapter in the same deployment without changing the core configuration contract.
 
 Documentation:
 
 - [Template documentation](https://ce-rise-software.codeberg.page/dp-system-gitops-template/)
-- [Optional services and deployment commands](https://ce-rise-software.codeberg.page/dp-system-gitops-template/extensions.html)
+- [Deployment](https://ce-rise-software.codeberg.page/dp-system-gitops-template/deployment.html)
+- [Configuration](https://ce-rise-software.codeberg.page/dp-system-gitops-template/configuration.html)
+- [Optional services](https://ce-rise-software.codeberg.page/dp-system-gitops-template/extensions.html)
 
 ## License
 

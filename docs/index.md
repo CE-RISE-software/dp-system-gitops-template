@@ -14,7 +14,7 @@ What this template assumes:
 - Service images and model catalog entries are pinned to published versions. Image settings remain configurable for the deployment.
 - Optional downstream services may be layered on top through isolated Compose profiles or Kustomize overlays.
 
-The supplied [optional extensions](extensions.md) deploy RE Indicators Calculation, SEE Impacts Calculation, or both alongside the same core service. SEE uses the BONSAI background and fixed EF 3.1 characterization factors included in its released image. The catalogs register the Product System, LCI Dataset, and Integrated LCA models required for its inputs and output.
+The supplied [optional extensions](extensions.md) deploy RE Indicators, SEE Impacts, or both alongside the same core service. Their deployment references cover service selection, configuration, network access, resource settings, and readiness checks.
 
 Use the sections in this documentation according to your deployment task. They are designed as peer references rather than a single linear tutorial.
 
